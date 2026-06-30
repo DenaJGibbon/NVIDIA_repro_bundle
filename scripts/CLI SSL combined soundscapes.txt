@@ -1,0 +1,169 @@
+# ------------------------------------------------------------
+# SimCLR ResNet18
+# GPU 1
+# ------------------------------------------------------------
+
+tmux new-session -d -s simclr_tropical_r18 "
+cd /home/nvidia/test_run &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=1 python train_simclr_tropical_weighted.py \
+  --data_roots \
+    /data/ssl_v1/SSL_Clips \
+    /data/ssl_v1/SSL_Clips_jahoo \
+    /data/ssl_v1/SSL_Clips_danum \
+    /data/ssl_v1/SSL_Clips_maliau \
+    /data/ssl_v1/SSL_Clips_tangkoko \
+    /data/ssl_v1/SSL_Clips_safe \
+    /data/ssl_v1/SSL_Clips_sumatra \
+  --outdir /home/nvidia/test_run/SSL_combined_experiments/simclr_tropical_weighted_outputs \
+  --epochs 100 \
+  --batch_size 64 \
+  --clip_sec 12 \
+  --source_weight_mode equal_source \
+  2>&1 | tee /home/nvidia/test_run/simclr_tropical_r18.log
+"
+
+# ------------------------------------------------------------
+# MAE
+# GPU 2
+# ------------------------------------------------------------
+
+tmux new-session -d -s mae_tropical "
+cd /home/nvidia/test_run &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=2 python train_mae_tropical_weighted.py \
+  --data_roots \
+    /data/ssl_v1/SSL_Clips \
+    /data/ssl_v1/SSL_Clips_jahoo \
+    /data/ssl_v1/SSL_Clips_danum \
+    /data/ssl_v1/SSL_Clips_maliau \
+    /data/ssl_v1/SSL_Clips_tangkoko \
+    /data/ssl_v1/SSL_Clips_safe \
+    /data/ssl_v1/SSL_Clips_sumatra \
+  --outdir /home/nvidia/test_run/SSL_combined_experiments/masked_autoencoder_tropical_weighted_outputs \
+  --epochs 100 \
+  --batch_size 64 \
+  --clip_sec 12 \
+  --source_weight_mode equal_source \
+  2>&1 | tee /home/nvidia/test_run/mae_tropical.log
+"
+
+# ------------------------------------------------------------
+# SimCLR ResNet50
+# GPU 0
+# ------------------------------------------------------------
+
+tmux new-session -d -s simclr_tropical_r50 "
+cd /home/nvidia/test_run &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=0 python train_simclr_tropical_weighted_resnet50.py \
+  --data_roots \
+    /data/ssl_v1/SSL_Clips \
+    /data/ssl_v1/SSL_Clips_jahoo \
+    /data/ssl_v1/SSL_Clips_danum \
+    /data/ssl_v1/SSL_Clips_maliau \
+    /data/ssl_v1/SSL_Clips_tangkoko \
+    /data/ssl_v1/SSL_Clips_safe \
+    /data/ssl_v1/SSL_Clips_sumatra \
+  --outdir /home/nvidia/test_run/SSL_combined_experiments/simclr_tropical_weighted_resnet50_outputs \
+  --epochs 100 \
+  --batch_size 32 \
+  --clip_sec 12 \
+  --source_weight_mode equal_source \
+  2>&1 | tee /home/nvidia/test_run/simclr_tropical_r50.log
+"
+
+# ------------------------------------------------------------
+# BirdNET extraction + student distillation
+# GPU 3
+# ------------------------------------------------------------
+
+tmux new-session -d -s student_birdnet "
+set -e
+
+cd /home/nvidia/birdnet_test &&
+source birdnet_env/bin/activate &&
+
+CUDA_VISIBLE_DEVICES=3 python extract_birdnet_embeddings.py \
+  --data_root /data/ssl_v1 \
+  --out_csv /home/nvidia/test_run/SSL_combined_experiments/birdnet_combined_outputs/birdnet_combined_embeddings.csv &&
+
+cd /home/nvidia/test_run &&
+source ssl_soundscapes/bin/activate &&
+
+CUDA_VISIBLE_DEVICES=3 python train_teacher_student_distill.py \
+  --data_roots \
+    /data/ssl_v1/SSL_Clips \
+    /data/ssl_v1/SSL_Clips_jahoo \
+    /data/ssl_v1/SSL_Clips_danum \
+    /data/ssl_v1/SSL_Clips_maliau \
+    /data/ssl_v1/SSL_Clips_tangkoko \
+    /data/ssl_v1/SSL_Clips_safe \
+    /data/ssl_v1/SSL_Clips_sumatra \
+  --teacher_csv /home/nvidia/test_run/SSL_combined_experiments/birdnet_combined_outputs/birdnet_combined_embeddings.csv \
+  --teacher_name BirdNET \
+  --outdir /home/nvidia/test_run/SSL_combined_experiments/student_birdnet_resnet18_outputs \
+  --backbone resnet18 \
+  --epochs 100 \
+  --batch_size 64 \
+  --clip_sec 12 \
+  2>&1 | tee /home/nvidia/test_run/student_birdnet.log
+"
+
+# ------------------------------------------------------------
+# Check sessions
+# ------------------------------------------------------------
+
+tmux ls
+
+# ------------------------------------------------------------
+# Monitor GPUs
+# ------------------------------------------------------------
+
+watch -n 1 nvidia-smi
+
+
+tmux new-session -d -s extract_embeddings "
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+DATA_ROOT=/data/ssl_v1/SSL_Clips
+EXP_ROOT=/home/nvidia/test_run/SSL_combined_experiments
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+DATA_ROOT=/data/ssl_v1/SSL_Clips
+EXP_ROOT=/home/nvidia/test_run/SSL_combined_experiments
+CUDA_VISIBLE_DEVICES=4 python extract_masked_autoencoder_embeddings.py \
+  --data_root $DATA_ROOT \
+  --checkpoint $EXP_ROOT/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_epoch30.pt \
+  --out_csv $EXP_ROOT/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_tropical_weighted_embeddings.csv \
+  --batch_size 64
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+CUDA_VISIBLE_DEVICES=4 python extract_simclr_resnet50_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --checkpoint /home/nvidia/test_run/SSL_combined_experiments/simclr_tropical_weighted_resnet50_outputs/simclr_resnet50_epoch19.pt \
+  --out_csv /home/nvidia/test_run/SSL_combined_experiments/simclr_tropical_weighted_resnet50_outputs/simclr_resnet50_tropical_weighted_embeddings.csv \
+  --batch_size 64 \
+  --clip_sec 12
+
+CUDA_VISIBLE_DEVICES=4 python extract_simclr_embeddings.py \
+  --data_root $DATA_ROOT \
+  --checkpoint $EXP_ROOT/simclr_tropical_weighted_outputs/simclr_resnet18_epoch20.pt \
+  --out_csv $EXP_ROOT/simclr_tropical_weighted_outputs/simclr_tropical_weighted_embeddings.csv
+"
+
+
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+python extract_student_birdnet_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --checkpoint /data/ssl_v1SSL_combined_experiments/student_birdnet_resnet18_outputs/student_BirdNET_resnet18_epoch30.pt \
+  --out_csv /data/ssl_v1/SSL_combined_experiments/student_birdnet_resnet18_outputs/student_birdnet_embeddings.csv \
+  --batch_size 64 \
+  --clip_sec 12

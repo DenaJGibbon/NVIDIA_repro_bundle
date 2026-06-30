@@ -1,0 +1,192 @@
+# This runs experiments concurrently
+
+tmux new-session -d -s simclr_full "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=0 python simclr_train.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --outdir /data/ssl_v1/SSL_full_experiments/simclr_outputs \
+  --epochs 100 \
+  --batch_size 128 \
+  --clip_sec 12
+"
+
+tmux new-session -d -s mae_full "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=1 python masked_autoencoder_train.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --outdir /data/ssl_v1/SSL_full_experiments/masked_autoencoder_outputs \
+  --epochs 100 \
+  --batch_size 128 \
+  --clip_sec 12
+"
+
+tmux new-session -d -s birdnet_extract "
+cd /home/nvidia/birdnet_test &&
+source birdnet_env/bin/activate &&
+CUDA_VISIBLE_DEVICES=4 python extract_birdnet_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --out_csv /data/ssl_v1/SSL_full_experiments/birdnet_outputs/birdnet_embeddings.csv
+"
+
+tmux new-session -d -s perch_extract "
+cd /home/nvidia/birdnet_test &&
+source birdnet_env/bin/activate &&
+CUDA_VISIBLE_DEVICES=5 python extract_perch_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --out_csv /data/ssl_v1/SSL_full_experiments/perch_outputs/perch_embeddings.csv \
+  --device CPU \
+  --batch_size 4 \
+  --n_workers 8
+"
+
+
+tmux new-session -d -s beats_extract "
+cd /data/ssl_v1/beats/unilm/beats &&
+source /data/ssl_v1/ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=3 python extract_beats_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --checkpoint /data/ssl_v1/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt \
+  --out_csv /data/ssl_v1/SSL_full_experiments/beats_outputs/beats_embeddings.csv \
+  --batch_size 16
+"
+
+
+tmux new-session -d -s nemo_base "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=6 python extract_nemo_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --out_csv /data/ssl_v1/SSL_full_experiments/nemo_outputs/nemo_embeddings.csv
+"
+
+
+
+tmux new-session -d -s sup_ecology "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=5 python train_supervised_ecology_encoder.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --outdir /data/ssl_v1/SSL_full_experiments/supervised_ecology_outputs \
+  --satellite_csv /home/nvidia/data/ssl_v1/satellite_embeddings_T01_T40_2025.csv \
+  --epochs 100 \
+  --batch_size 128 \
+  --clip_sec 12
+"
+
+tmux new-session -d -s sup_ecologyrainfall "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=6 python train_supervised_ecology_rainfall.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --metadata_csv /home/nvidia/data/ssl_v1/Dep01Dep02SoundscapeMetadata.csv \
+  --satellite_csv /home/nvidia/data/ssl_v1/satellite_embeddings_T01_T40_2025.csv \
+  --outdir /data/ssl_v1/SSL_full_experiments/supervised_ecology_rainfall_outputs \
+  --rain_col Rain_3day_mm \
+  --epochs 100 \
+  --batch_size 64 \
+  --clip_sec 12
+"
+
+tmux new-session -d -s nemo_adapt "
+cd /data/ssl_v1 &&
+source ssl_soundscapes/bin/activate &&
+CUDA_VISIBLE_DEVICES=7 python nemo_contrastive_adapt.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --outdir /data/ssl_v1/SSL_full_experiments/nemo_adapt_outputs \
+  --epochs 100 \
+  --batch_size 16 \
+  --clip_sec 12
+"
+
+
+################# Extract embeddings
+
+cd /data/ssl_v1
+source ssl_soundscapes/bin/activate
+
+DATA_ROOT=/data/ssl_v1/SSL_Clips
+EXP_ROOT=/data/ssl_v1/SSL_full_experiments
+
+# ------------------------------------------------------------
+# SimCLR
+# ------------------------------------------------------------
+
+python extract_simclr_embeddings.py \
+  --data_root $DATA_ROOT \
+  --checkpoint $EXP_ROOT/simclr_outputs/simclr_resnet18_epoch40.pt \
+  --out_csv $EXP_ROOT/simclr_outputs/simclr_embeddings.csv
+
+# ------------------------------------------------------------
+# NeMo adapted
+# ------------------------------------------------------------
+DATA_ROOT=/data/ssl_v1/SSL_Clips
+EXP_ROOT=/data/ssl_v1/SSL_full_experiments
+
+python extract_nemo_adapt_embeddings.py \
+  --data_root $DATA_ROOT \
+  --checkpoint $EXP_ROOT/nemo_adapt_outputs/nemo_contrastive_epoch30.pt \
+  --out_csv $EXP_ROOT/nemo_adapt_outputs/nemo_adapt_embeddingsepoch30.csv \
+  --batch_size 8 \
+  --clip_sec 12
+
+# ------------------------------------------------------------
+# Masked autoencoder
+# ------------------------------------------------------------
+
+python extract_masked_autoencoder_embeddings.py \
+  --data_root $DATA_ROOT \
+  --checkpoint $EXP_ROOT/masked_autoencoder_outputs/masked_autoencoder_epoch40.pt \
+  --out_csv $EXP_ROOT/masked_autoencoder_outputs/masked_autoencoder_embeddings.csv \
+  --batch_size 64
+
+# ------------------------------------------------------------
+# BigVGAN
+# ------------------------------------------------------------
+
+tmux new-session -d -s bigvgan_extract "
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+CUDA_VISIBLE_DEVICES=2 python extract_bigvan_embeddings_finetune.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --checkpoint_file /data/ssl_v1/bigvgan_checkpoints/bigvgan_ksws_full_pretrained_init_4gpu/g_00004000 \
+  --out_csv /data/ssl_v1/SSL_full_experiments/bigvgan_outputs/bigvgan_embeddings.csv \
+  --device cuda
+"
+
+cd /data/ssl_v1
+
+source ssl_soundscapes/bin/activate
+
+
+################# Probe
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+
+python plot_probe_embeddings.py \
+  --embedding_csv /data/ssl_v1/SSL_full_experiments/perch_outputs/perch_embeddings.csv \
+  --habitat_csv /data/ssl_v1/habitat_metadata.csv \
+  --outdir /data/ssl_v1/SSL_full_experiments/perch_outputs/ \
+  --feature_prefix emb_ \
+  --name perch_v2
+
+
+tmux new-session -d -s compare_models "
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python compare_all_models_full.py
+"
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+python combined_model_results.py
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+python combined_model_results_ecolonly.py

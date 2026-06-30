@@ -1,0 +1,8 @@
+*.pt
+g_*
+do_*
+*.wav
+*.flac
+*.mp3
+embedding_outputs/
+checkpoints_used/

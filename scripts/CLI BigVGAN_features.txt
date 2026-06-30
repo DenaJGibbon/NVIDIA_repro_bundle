@@ -1,0 +1,86 @@
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+python extract_bigvgan_features.py \
+  --data_root /data/ssl_v1/training_kswsspecies \
+  --out_csv /data/ssl_v1/ksws_bigvgan_features/test_bigvgan_features.csv \
+  --max_files 50
+
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+python bigvgan_umap.py \
+  --embeddings_csv /data/ssl_v1/ksws_bigvgan_features/test_bigvgan_features.csv \
+  --out_prefix /data/ssl_v1/ksws_bigvgan_features/bigvgan
+
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+
+python extract_bigvgan_features.py \
+  --data_root /data/ssl_v1/training_kswsspecies \
+  --out_csv /data/ssl_v1/ksws_bigvgan_features/test_bigvgan_features_deep.csv \
+  --max_files 250
+
+python bigvgan_umap.py \
+  --embeddings_csv /data/ssl_v1/ksws_bigvgan_features/test_bigvgan_features_deep.csv \
+  --out_prefix /data/ssl_v1/ksws_bigvgan_features/bigvgan
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+mkdir -p /data/ssl_v1/ksws_bigvgan_resynth_ksws_54k
+
+python inference.py \
+  --checkpoint_file exp/bigvgan_ksws_1k_pretrained_init/g_00001100 \
+  --input_wavs_dir /data/ssl_v1/training_kswsspecies/gibbon \
+  --output_dir /data/ssl_v1/ksws_bigvgan_resynth_ksws_54k
+
+tmux new -s bigvgan_pretrained "
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+python train.py \
+  --config configs/bigvgan_v2_24khz_100band_256x.json \
+  --input_wavs_dir /data/ssl_v1 \
+  --input_training_file filelists/KSWS/train_1k.txt \
+  --input_validation_file filelists/KSWS/val_500.txt \
+  --list_input_unseen_wavs_dir /data/ssl_v1 \
+  --list_input_unseen_validation_file filelists/KSWS/val_500.txt \
+  --checkpoint_path exp/bigvgan_ksws_1k_pretrained_init \
+  --checkpoint_interval 100 \
+  --validation_interval 999999999 \
+  --stdout_interval 10 \
+  2>&1 | tee /data/ssl_v1/ksws_bigvgan_features/bigvgan_ksws_1k_pretrained_init_train.log
+"
+
+
+
+tmux new -s bigvgan_pretrained "
+
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True CUDA_VISIBLE_DEVICES=1,2 python train.py \
+  --config configs/bigvgan_v2_24khz_100band_256x.json \
+  --input_wavs_dir /data/ssl_v1 \
+  --input_training_file filelists/KSWS/train_noext.txt \
+  --input_validation_file filelists/KSWS/val_noext.txt \
+  --list_input_unseen_wavs_dir /data/ssl_v1 \
+  --list_input_unseen_validation_file filelists/KSWS/val_noext.txt \
+  --checkpoint_path exp/bigvgan_ksws_full_pretrained_init_2gpu \
+  --checkpoint_interval 1000 \
+  --validation_interval 999999999 \
+  --stdout_interval 50 \
+  2>&1 | tee -a /data/ssl_v1/ksws_bigvgan_features/bigvgan_ksws_full_pretrained_init_2gpu_train.log
+"
+
+python extract_bigvan_embeddings_finetune.py \
+  --data_root /data/ssl_v1/training_kswsspecies \
+  --out_csv /data/ssl_v1/ksws_bigvgan_features/bigvgan_finetuned_01100_embeddings_test.csv \
+  --checkpoint_file exp/bigvgan_ksws_1k_pretrained_init/g_00001100 
+
+
+python bigvgan_umap.py \
+  --embeddings_csv /data/ssl_v1/ksws_bigvgan_features/bigvgan_finetuned_05000_embeddings_test.csv \
+  --out_prefix /data/ssl_v1/ksws_bigvgan_features/bigvgan_finetuned_05000_test

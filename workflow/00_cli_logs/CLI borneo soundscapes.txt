@@ -1,0 +1,305 @@
+# ------------------------------------------------------------
+# Setup: Borneo soundscapes
+# ------------------------------------------------------------
+
+
+tmux new-session -d -s safe_extract_embeddings "
+set -e
+
+DATA_ROOT="/home/nvidia/data/ssl_v1/ambient_acoustics_flat"
+OUTPUT_ROOT=/data/ssl_v1/borneo_soundscape_outputs
+
+FULL_MODEL_ROOT=/data/ssl_v1/SSL_full_experiments
+DANUM_MODEL_ROOT=/data/ssl_v1/SSL_full_experiments_danum
+COMBINED_MODEL_ROOT=/data/ssl_v1/SSL_combined_experiments
+
+mkdir -p \${OUTPUT_ROOT}
+
+# ------------------------------------------------------------
+# SimCLR full Cambodia
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+mkdir -p \${OUTPUT_ROOT}/simclr_full_outputs
+
+if [ -f \${OUTPUT_ROOT}/simclr_full_outputs/simclr_embeddings.csv ]; then
+  echo 'SimCLR full already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_simclr_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint ${FULL_MODEL_ROOT}/simclr_outputs/simclr_resnet18_epoch40.pt \
+    --out_csv \${OUTPUT_ROOT}/simclr_full_outputs/simclr_embeddings.csv
+fi
+
+# ------------------------------------------------------------
+# SimCLR Danum
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/simclr_danum_outputs
+
+if [ -f \${OUTPUT_ROOT}/simclr_danum_outputs/simclr_embeddings.csv ]; then
+  echo 'SimCLR Danum already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_simclr_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint \${DANUM_MODEL_ROOT}/simclr_outputs/simclr_resnet18_epoch40.pt \
+    --out_csv \${OUTPUT_ROOT}/simclr_danum_outputs/simclr_embeddings.csv
+fi
+
+# ------------------------------------------------------------
+# SimCLR tropical weighted ResNet18
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/simclr_tropical_weighted_outputs
+
+if [ -f \${OUTPUT_ROOT}/simclr_tropical_weighted_outputs/simclr_embeddings.csv ]; then
+  echo 'SimCLR tropical weighted R18 already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_simclr_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint \${COMBINED_MODEL_ROOT}/simclr_tropical_weighted_outputs/simclr_resnet18_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/simclr_tropical_weighted_outputs/simclr_embeddings.csv
+fi
+
+# ------------------------------------------------------------
+# SimCLR tropical weighted ResNet50
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs
+
+if [ -f \${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_embeddings.csv ]; then
+  echo 'SimCLR tropical weighted R50 already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_simclr_resnet50_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint \${COMBINED_MODEL_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_resnet50_epoch40.pt \
+    --out_csv \${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+# ------------------------------------------------------------
+# Masked autoencoder full Cambodia
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/masked_autoencoder_full_outputs
+
+if [ -f \${OUTPUT_ROOT}/masked_autoencoder_full_outputs/masked_autoencoder_embeddings.csv ]; then
+  echo 'MAE full already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_masked_autoencoder_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint ${FULL_MODEL_ROOT}/masked_autoencoder_outputs/masked_autoencoder_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/masked_autoencoder_full_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+# ------------------------------------------------------------
+# Masked autoencoder Danum
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/masked_autoencoder_danum_outputs
+
+if [ -f \${OUTPUT_ROOT}/masked_autoencoder_danum_outputs/masked_autoencoder_embeddings.csv ]; then
+  echo 'MAE Danum already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_masked_autoencoder_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint \${DANUM_MODEL_ROOT}/masked_autoencoder_outputs/masked_autoencoder_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/masked_autoencoder_danum_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+# ------------------------------------------------------------
+# Masked autoencoder tropical weighted
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs
+
+if [ -f \${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_embeddings.csv ]; then
+  echo 'MAE tropical weighted already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_masked_autoencoder_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint /data/ssl_v1/SSL_combined_experiments/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+# ------------------------------------------------------------
+# NeMo baseline
+# ------------------------------------------------------------
+DATA_ROOT="/home/nvidia/data/ssl_v1/ambient_acoustics_flat"
+OUTPUT_ROOT="/data/ssl_v1/borneo_soundscape_outputs"
+
+mkdir -p ${OUTPUT_ROOT}/nemo_outputs
+
+if [ -f ${OUTPUT_ROOT}/nemo_outputs/nemo_embeddings.csv ]; then
+  echo "NeMo baseline already exists. Skipping."
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_nemo_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/nemo_outputs/nemo_embeddings.csv
+fi
+# ------------------------------------------------------------
+# NeMo adapted
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/nemo_adapt_full_outputs
+
+if [ -f \${OUTPUT_ROOT}/nemo_adapt_full_outputs/nemo_adapt_embeddings.csv ]; then
+  echo 'NeMo adapted already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_nemo_adapt_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint ${FULL_MODEL_ROOT}/nemo_adapt_outputs/nemo_contrastive_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/nemo_adapt_full_outputs/nemo_adapt_embeddings.csv \
+    --batch_size 8 \
+    --clip_sec 12
+fi
+
+# ------------------------------------------------------------
+# Supervised ecology
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/supervised_ecology_outputs
+
+if [ -f \${OUTPUT_ROOT}/supervised_ecology_outputs/supervised_ecology_embeddings.csv ]; then
+  echo 'Supervised ecology already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_supervised_ecology_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint ${FULL_MODEL_ROOT}/supervised_ecology_outputs/supervised_eco_encoder_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/supervised_ecology_outputs/supervised_ecology_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+# ------------------------------------------------------------
+# Supervised ecology rainfall
+# ------------------------------------------------------------
+
+mkdir -p \${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs
+
+if [ -f \${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs/supervised_ecology_rainfall_embeddings.csv ]; then
+  echo 'Supervised ecology rainfall already exists. Skipping.'
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_supervised_ecology_rainfall_embeddings.py \
+    --data_root "/home/nvidia/data/ssl_v1/ambient_acoustics_flat" \
+    --checkpoint ${FULL_MODEL_ROOT}/supervised_ecology_rainfall_outputs/supervised_eco_encoder_epoch30.pt \
+    --out_csv \${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs/supervised_ecology_rainfall_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+# ------------------------------------------------------------
+# Student BirdNET
+# ------------------------------------------------------------
+
+mkdir -p /data/ssl_v1/borneo_soundscape_outputs/student_birdnet_outputs
+
+CUDA_VISIBLE_DEVICES=4 python /home/nvidia/test_run/extract_student_birdnet_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/ambient_acoustics_flat \
+  --checkpoint /data/ssl_v1/SSL_combined_experiments/student_birdnet_resnet18_outputs/student_BirdNET_resnet18_epoch30.pt \
+  --out_csv /data/ssl_v1/ambient_acoustics_detection_outputs/student_birdnet_outputs/student_birdnet_embeddings.csv \
+  --batch_size 64 \
+  --clip_sec 12
+
+
+# ------------------------------------------------------------
+# BigVGAN full 4GPU fine-tuned
+# ------------------------------------------------------------
+
+OUTPUT_ROOT=/data/ssl_v1/borneo_soundscape_outputs
+DATA_ROOT=/home/nvidia/data/ssl_v1/ambient_acoustics_flat
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/bigvgan_outputs
+
+if [ -f ${OUTPUT_ROOT}/bigvgan_outputs/bigvgan_embeddings.csv ]; then
+  echo "BigVGAN already exists. Skipping."
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_bigvan_embeddings_finetune.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint_file /data/ssl_v1/bigvgan_checkpoints/bigvgan_ksws_full_pretrained_init_4gpu/g_00004000 \
+    --out_csv ${OUTPUT_ROOT}/bigvgan_outputs/bigvgan_embeddings.csv \
+    --device cuda
+fi
+
+
+OUTPUT_ROOT=/data/ssl_v1/borneo_soundscape_outputs
+DATA_ROOT=/home/nvidia/data/ssl_v1/ambient_acoustics_flat
+
+# ------------------------------------------------------------
+# BirdNET
+# ------------------------------------------------------------
+
+cd /home/nvidia/birdnet_test
+source birdnet_env/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/birdnet_outputs
+
+if [ -f ${OUTPUT_ROOT}/birdnet_outputs/birdnet_embeddings.csv ]; then
+  echo "BirdNET already exists. Skipping."
+else
+  CUDA_VISIBLE_DEVICES=4 python extract_birdnet_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/birdnet_outputs/birdnet_embeddings.csv
+fi
+
+# ------------------------------------------------------------
+# Perch v2
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/perch_outputs
+
+if [ -f ${OUTPUT_ROOT}/perch_outputs/perch_embeddings.csv ]; then
+  echo "Perch already exists. Skipping."
+else
+  python extract_perch_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/perch_outputs/perch_embeddings.csv \
+    --device CPU \
+    --batch_size 4 \
+    --n_workers 8
+fi
+
+# ------------------------------------------------------------
+# BEATs
+# ------------------------------------------------------------
+OUTPUT_ROOT=/data/ssl_v1/borneo_soundscape_outputs
+DATA_ROOT=/home/nvidia/data/ssl_v1/ambient_acoustics_flat
+cd /home/nvidia/test_run/beats/unilm/beats
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/beats_outputs
+
+if [ -f ${OUTPUT_ROOT}/beats_outputs/beats_embeddings.csv ]; then
+  echo "BEATs already exists. Skipping."
+else
+  CUDA_VISIBLE_DEVICES=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python extract_beats_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint /home/nvidia/test_run/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt \
+    --out_csv ${OUTPUT_ROOT}/beats_outputs/beats_embeddings.csv \
+    --batch_size 4
+fi
+
+echo 'SAFE embedding extraction complete.'
+"
+
+tmux attach -t safe_extract_embeddings
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+python compare_all_models_borneo_soundscapes.py
+
+
+python combined_model_results_ecolonly.py
+
+python compare_models_safe.py
+python combined_model_results.py

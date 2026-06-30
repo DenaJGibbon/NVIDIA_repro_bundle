@@ -1,0 +1,160 @@
+cd ~/test_run
+
+source ssl_soundscapes/bin/activate
+
+# ------------------------------------------------------------
+# Run NEMO contrastive
+# ------------------------------------------------------------
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python simclr_train.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --outdir /home/nvidia/test_run/simclr_outputs \
+  --epochs 30 \
+  --batch_size 64 \
+  --clip_sec 12
+
+python extract_simclr_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --checkpoint /home/nvidia/test_run/simclr_outputs/simclr_resnet18_final.pt \
+  --out_csv /home/nvidia/test_run/simclr_outputs/simclr_embeddings.csv
+
+# ------------------------------------------------------------
+# Run NEMO baseline
+# ------------------------------------------------------------
+
+python extract_nemo_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --out_csv /home/nvidia/test_run/nemo_embeddings.csv
+
+python plot_probe_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/nemo_embeddings.csv \
+  --habitat_csv /home/nvidia/test_run/habitat_metadata.csv \
+  --outdir /home/nvidia/test_run/nemo_outputs \
+  --feature_prefix emb_ \
+  --name nemo
+
+# ------------------------------------------------------------
+# Run NEMO contrastive
+# ------------------------------------------------------------
+
+python nemo_contrastive_adapt.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --outdir /home/nvidia/test_run/nemo_adapt_outputs_10ep \
+  --epochs 10 \
+  --batch_size 8 \
+  --clip_sec 12
+
+python extract_nemo_adapt_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --checkpoint /home/nvidia/test_run/nemo_adapt_outputs_10ep/nemo_contrastive_final.pt \
+  --out_csv /home/nvidia/test_run/nemo_adapt_outputs_10ep/nemo_adapt_embeddings.csv \
+  --batch_size 4 \
+  --clip_sec 12
+
+python plot_probe_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/nemo_adapt_outputs_10ep/nemo_adapt_embeddings.csv \
+  --habitat_csv /home/nvidia/test_run/habitat_metadata.csv \
+  --outdir /home/nvidia/test_run/nemo_adapt_outputs_10ep \
+  --feature_prefix emb_ \
+  --name nemo_adapted_10ep
+
+# ------------------------------------------------------------
+# Run BirdNET embedding extraction
+# ------------------------------------------------------------
+
+cd ~/birdnet_test
+source birdnet_env/bin/activate
+
+python extract_birdnet_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --out_csv /home/nvidia/test_run/birdnet_outputs/birdnet_embeddings.csv
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python plot_probe_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/birdnet_outputs/birdnet_embeddings.csv \
+  --habitat_csv /home/nvidia/test_run/habitat_metadata.csv \
+  --outdir /home/nvidia/test_run/birdnet_outputs \
+  --feature_prefix emb_ \
+  --name birdnet
+
+# ------------------------------------------------------------
+# Run Perch v2 embedding extraction
+# ------------------------------------------------------------
+
+cd ~/birdnet_test
+source birdnet_env/bin/activate
+
+python extract_perch_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --out_csv /home/nvidia/test_run/perch_outputs/perch_embeddings.csv \
+  --device CPU \
+  --batch_size 1 \
+  --n_workers 1
+
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+
+python plot_probe_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/perch_outputs/perch_embeddings.csv \
+  --habitat_csv /home/nvidia/test_run/habitat_metadata.csv \
+  --outdir /home/nvidia/test_run/perch_outputs \
+  --feature_prefix emb_ \
+  --name perch_v2
+
+# ------------------------------------------------------------
+# Run BEATS transformer based SSL
+# ------------------------------------------------------------
+
+
+cd ~/test_run/beats/unilm/beats
+python extract_beats_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --checkpoint /home/nvidia/test_run/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt \
+  --out_csv /home/nvidia/test_run/beats_outputs/beats_embeddings.csv \
+  --batch_size 8
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python plot_probe_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/beats_outputs/beats_embeddings.csv \
+  --habitat_csv /home/nvidia/test_run/habitat_metadata.csv \
+  --outdir /home/nvidia/test_run/beats_outputs \
+  --feature_prefix emb_ \
+  --name beats
+
+# ------------------------------------------------------------
+# Generative model
+# ------------------------------------------------------------
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python masked_autoencoder_train.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --outdir /home/nvidia/test_run/masked_autoencoder_outputs \
+  --epochs 30 \
+  --batch_size 64 \
+  --clip_sec 12
+
+python extract_masked_autoencoder_embeddings.py \
+  --data_root /home/nvidia/data/ssl_v1/SSL_Clips_small \
+  --checkpoint /home/nvidia/test_run/masked_autoencoder_outputs/masked_autoencoder_final.pt \
+  --out_csv /home/nvidia/test_run/masked_autoencoder_outputs/masked_autoencoder_embeddings.csv \
+  --batch_size 64
+
+# ------------------------------------------------------------
+# Compare all models
+# ------------------------------------------------------------
+
+cd ~/test_run
+source ssl_soundscapes/bin/activate
+
+python compare_all_models.py

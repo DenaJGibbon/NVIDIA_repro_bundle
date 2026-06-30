@@ -1,0 +1,12 @@
+
+Listing audio files...
+Files found: 118405
+Device: cuda
+n_sat: 64
+n_habitats: 4
+
+Saved:
+/home/nvidia/test_run/SSL_full_experiments/supervised_ecology_rainfall_outputs/supervised_ecology_rainfall_embeddings.csv
+
+Rows: 118405
+Embedding dimensions: 512

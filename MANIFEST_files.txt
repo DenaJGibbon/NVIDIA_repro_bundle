@@ -1,0 +1,185 @@
+./.ipynb_checkpoints/requirements_ssl_soundscapes-checkpoint.txt
+./BUNDLE_CONTENTS_SIZES.txt
+./BUNDLE_SIZE.txt
+./MANIFEST_files.txt
+./checkpoints_used/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt
+./checkpoints_used/bigvgan_g00004000/config.json
+./checkpoints_used/bigvgan_g00004000/do_00004000
+./checkpoints_used/bigvgan_g00004000/g_00004000
+./configs/Dep01Dep02SoundscapeMetadata.csv
+./configs/bigvgan_22khz_80band.json
+./configs/bigvgan_24khz_100band.json
+./configs/bigvgan_base_22khz_80band.json
+./configs/bigvgan_base_24khz_100band.json
+./configs/bigvgan_ksws_pilot.json
+./configs/bigvgan_v2_22khz_80band_256x.json
+./configs/bigvgan_v2_22khz_80band_fmax8k_256x.json
+./configs/bigvgan_v2_24khz_100band_256x.json
+./configs/bigvgan_v2_44khz_128band_256x.json
+./configs/bigvgan_v2_44khz_128band_512x.json
+./configs/satellite_embeddings_T01_T40_2025.csv
+./requirements_birdnet_env.txt
+./requirements_ssl_soundscapes.txt
+./results/.ipynb_checkpoints/all_model_benchmarks_heatmap-checkpoint.png
+./results/all_model_benchmarks_combined.csv
+./results/all_model_benchmarks_combined_collapsed.csv
+./results/all_model_benchmarks_ecolonly__barplot.png
+./results/all_model_benchmarks_ecolonly__combined.csv
+./results/all_model_benchmarks_ecolonly__combined_collapsed.csv
+./results/all_model_benchmarks_ecolonly__heatmap.png
+./results/all_model_benchmarks_ecolonly__pivot.csv
+./results/all_model_benchmarks_heatmap.png
+./results/all_model_benchmarks_pivot.csv
+./scripts/.ipynb_checkpoints/CLI SSL full data run-checkpoint.txt
+./scripts/.ipynb_checkpoints/compare_all_models_gibbon_individuals-checkpoint.py
+./scripts/CLI BigVGAN_features.txt
+./scripts/CLI Gibbon Individual _ Cambodia.txt
+./scripts/CLI Gibbon Individual.txt
+./scripts/CLI SAFE soundscapes.txt
+./scripts/CLI SSL Gibbon Automated Detection _ Cambodia.txt
+./scripts/CLI SSL Gibbon Automated Detection _ Malaysia.txt
+./scripts/CLI SSL combined soundscapes.txt
+./scripts/CLI SSL full data Danum.txt
+./scripts/CLI SSL full data run.txt
+./scripts/CLI SSL.txt
+./scripts/CLI agile modeling.txt
+./scripts/CLI borneo soundscapes.txt
+./scripts/activations.py
+./scripts/bad_audio_files.txt
+./scripts/bigvgan.py
+./scripts/bigvgan_bioacoustic_augment.py
+./scripts/bigvgan_umap.py
+./scripts/birdnet_centroid_similarity_search.py
+./scripts/birdnet_nearest_neighbor_search.py
+./scripts/birdnet_perch/birdnet_perch_comp.py
+./scripts/birdnet_perch/extract_birdnet_embeddings.py
+./scripts/birdnet_perch/extract_birdnet_segment_embeddings.py
+./scripts/birdnet_perch/extract_perch_embeddings.py
+./scripts/birdnet_perch/extract_perch_segment_embeddings.py
+./scripts/birdnet_perch/inspect_birdnet_api.py
+./scripts/blackshanked_birdnet_nearest_neighbors.py
+./scripts/combined_model_results.py
+./scripts/combined_model_results_ecolonly.py
+./scripts/compare_all_models.py
+./scripts/compare_all_models_automated_detect_cambodia.py
+./scripts/compare_all_models_automated_detect_malaysia.py
+./scripts/compare_all_models_borneo_soundscapes.py
+./scripts/compare_all_models_full.py
+./scripts/compare_all_models_gibbon_individuals.py
+./scripts/compare_all_models_gibbon_individuals_cambodia.py
+./scripts/compare_models_safe.py
+./scripts/detection_probe_from_embeddings.py
+./scripts/discriminators.py
+./scripts/env.py
+./scripts/export_nn_candidates.py
+./scripts/export_uploaded_filenames.py
+./scripts/extract_bigvan_embeddings_finetune.py
+./scripts/extract_bigvgan_features.py
+./scripts/extract_masked_autoencoder_embeddings.py
+./scripts/extract_nemo_adapt_embeddings.py
+./scripts/extract_nemo_embeddings.py
+./scripts/extract_simclr_embeddings.py
+./scripts/extract_simclr_resnet50_embeddings.py
+./scripts/extract_student_birdnet_embeddings.py
+./scripts/extract_supervised_ecology_embeddings.py
+./scripts/extract_supervised_ecology_rainfall_embeddings.py
+./scripts/fix_birdnet_embeddings.py
+./scripts/inference.py
+./scripts/inference_e2e.py
+./scripts/loss.py
+./scripts/masked_autoencoder_train.py
+./scripts/meldataset.py
+./scripts/nemo_contrastive_adapt.py
+./scripts/plot_probe_danum_embeddings.py
+./scripts/plot_probe_embeddings.py
+./scripts/plot_probe_gibbon_individuals.py
+./scripts/rainfall_embedding_log.txt
+./scripts/requirements.txt
+./scripts/resynthesize_bigvgan.py
+./scripts/simclr_detection_probe.py
+./scripts/simclr_train.py
+./scripts/sound_file_exploration.py
+./scripts/ssl_smoke_train.py
+./scripts/test_train.py
+./scripts/train.py
+./scripts/train_mae_tropical_weighted.py
+./scripts/train_simclr_tropical_weighted.py
+./scripts/train_simclr_tropical_weighted_resnet50.py
+./scripts/train_supervised_ecology_encoder.py
+./scripts/train_supervised_ecology_rainfall.py
+./scripts/train_teacher_student_distill.py
+./scripts/utils.py
+./workflow/00_cli_logs/CLI BigVGAN_features.txt
+./workflow/00_cli_logs/CLI Gibbon Individual _ Cambodia.txt
+./workflow/00_cli_logs/CLI Gibbon Individual.txt
+./workflow/00_cli_logs/CLI SAFE soundscapes.txt
+./workflow/00_cli_logs/CLI SSL Gibbon Automated Detection _ Cambodia.txt
+./workflow/00_cli_logs/CLI SSL Gibbon Automated Detection _ Malaysia.txt
+./workflow/00_cli_logs/CLI SSL combined soundscapes.txt
+./workflow/00_cli_logs/CLI SSL full data Danum.txt
+./workflow/00_cli_logs/CLI SSL full data run.txt
+./workflow/00_cli_logs/CLI SSL.txt
+./workflow/00_cli_logs/CLI agile modeling.txt
+./workflow/00_cli_logs/CLI borneo soundscapes.txt
+./workflow/01_training/masked_autoencoder_train.py
+./workflow/01_training/nemo_contrastive_adapt.py
+./workflow/01_training/simclr_train.py
+./workflow/01_training/train_mae_tropical_weighted.py
+./workflow/01_training/train_simclr_tropical_weighted.py
+./workflow/01_training/train_simclr_tropical_weighted_resnet50.py
+./workflow/01_training/train_supervised_ecology_encoder.py
+./workflow/01_training/train_supervised_ecology_rainfall.py
+./workflow/01_training/train_teacher_student_distill.py
+./workflow/02_embedding_extraction/extract_bigvan_embeddings_finetune.py
+./workflow/02_embedding_extraction/extract_birdnet_embeddings.py
+./workflow/02_embedding_extraction/extract_birdnet_segment_embeddings.py
+./workflow/02_embedding_extraction/extract_masked_autoencoder_embeddings.py
+./workflow/02_embedding_extraction/extract_nemo_adapt_embeddings.py
+./workflow/02_embedding_extraction/extract_nemo_embeddings.py
+./workflow/02_embedding_extraction/extract_perch_embeddings.py
+./workflow/02_embedding_extraction/extract_perch_segment_embeddings.py
+./workflow/02_embedding_extraction/extract_simclr_embeddings.py
+./workflow/02_embedding_extraction/extract_simclr_resnet50_embeddings.py
+./workflow/02_embedding_extraction/extract_student_birdnet_embeddings.py
+./workflow/02_embedding_extraction/extract_supervised_ecology_embeddings.py
+./workflow/02_embedding_extraction/extract_supervised_ecology_rainfall_embeddings.py
+./workflow/03_benchmarks/compare_all_models.py
+./workflow/03_benchmarks/compare_all_models_automated_detect_cambodia.py
+./workflow/03_benchmarks/compare_all_models_automated_detect_malaysia.py
+./workflow/03_benchmarks/compare_all_models_borneo_soundscapes.py
+./workflow/03_benchmarks/compare_all_models_full.py
+./workflow/03_benchmarks/compare_all_models_gibbon_individuals.py
+./workflow/03_benchmarks/compare_all_models_gibbon_individuals_cambodia.py
+./workflow/03_benchmarks/compare_models_safe.py
+./workflow/03_benchmarks/detection_probe_from_embeddings.py
+./workflow/03_benchmarks/plot_probe_danum_embeddings.py
+./workflow/03_benchmarks/plot_probe_embeddings.py
+./workflow/03_benchmarks/plot_probe_gibbon_individuals.py
+./workflow/04_summary_figures/combined_model_results.py
+./workflow/04_summary_figures/combined_model_results_ecolonly.py
+./workflow/05_bigvgan/bigvgan.py
+./workflow/05_bigvgan/bigvgan_train.py
+./workflow/05_bigvgan/discriminators.py
+./workflow/05_bigvgan/env.py
+./workflow/05_bigvgan/extract_bigvgan_features.py
+./workflow/05_bigvgan/inference.py
+./workflow/05_bigvgan/inference_e2e.py
+./workflow/05_bigvgan/loss.py
+./workflow/05_bigvgan/meldataset.py
+./workflow/05_bigvgan/resynthesize_bigvgan.py
+./workflow/WORKFLOW_MANIFEST.txt
+./workflow/environment/requirements.txt
+./workflow/environment/requirements_birdnet_env.txt
+./workflow/environment/requirements_ssl_soundscapes.txt
+./workflow/metadata/Dep01Dep02SoundscapeMetadata.csv
+./workflow/metadata/bigvgan_22khz_80band.json
+./workflow/metadata/bigvgan_24khz_100band.json
+./workflow/metadata/bigvgan_base_22khz_80band.json
+./workflow/metadata/bigvgan_base_24khz_100band.json
+./workflow/metadata/bigvgan_ksws_pilot.json
+./workflow/metadata/bigvgan_v2_22khz_80band_256x.json
+./workflow/metadata/bigvgan_v2_22khz_80band_fmax8k_256x.json
+./workflow/metadata/bigvgan_v2_24khz_100band_256x.json
+./workflow/metadata/bigvgan_v2_44khz_128band_256x.json
+./workflow/metadata/bigvgan_v2_44khz_128band_512x.json
+./workflow/metadata/satellite_embeddings_T01_T40_2025.csv

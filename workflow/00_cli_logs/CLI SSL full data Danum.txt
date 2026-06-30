@@ -1,0 +1,126 @@
+# ============================================================
+# DANUM FULL SSL PIPELINE
+# Sequential on GPU 7
+# ============================================================
+
+tmux new-session -d -s danum_ssl "
+
+cd /home/nvidia/test_run &&
+
+source ssl_soundscapes/bin/activate &&
+
+mkdir -p /home/nvidia/test_run/SSL_full_experiments_danum &&
+
+# ============================================================
+# SETTINGS
+# ============================================================
+
+export DATA_ROOT=/data/ssl_v1/SSL_Clips_danum
+export EXP_ROOT=/home/nvidia/test_run/SSL_full_experiments_danum
+
+# ============================================================
+# SimCLR SSL
+# ============================================================
+
+mkdir -p \$EXP_ROOT/simclr_outputs
+
+CUDA_VISIBLE_DEVICES=7 python simclr_train.py \
+  --data_root \$DATA_ROOT \
+  --outdir \$EXP_ROOT/simclr_outputs \
+  --epochs 100 \
+  --batch_size 128 \
+  --clip_sec 12 \
+  2>&1 | tee \$EXP_ROOT/simclr_outputs/simclr_train.log
+
+
+CUDA_VISIBLE_DEVICES=7 python extract_simclr_embeddings.py \
+  --data_root \$DATA_ROOT \
+  --checkpoint \$EXP_ROOT/simclr_outputs/simclr_resnet18_final.pt \
+  --out_csv \$EXP_ROOT/simclr_outputs/simclr_embeddings.csv \
+  2>&1 | tee \$EXP_ROOT/simclr_outputs/simclr_extract.log
+
+
+# ============================================================
+# NeMo baseline
+# ============================================================
+
+mkdir -p \$EXP_ROOT/nemo_outputs
+
+CUDA_VISIBLE_DEVICES=7 python extract_nemo_embeddings.py \
+  --data_root \$DATA_ROOT \
+  --out_csv \$EXP_ROOT/nemo_outputs/nemo_embeddings.csv \
+  2>&1 | tee \$EXP_ROOT/nemo_outputs/nemo_extract.log
+
+
+# ============================================================
+# NeMo adapted SSL
+# ============================================================
+
+mkdir -p \$EXP_ROOT/nemo_adapt_outputs
+
+CUDA_VISIBLE_DEVICES=7 python nemo_contrastive_adapt.py \
+  --data_root \$DATA_ROOT \
+  --outdir \$EXP_ROOT/nemo_adapt_outputs \
+  --epochs 30 \
+  --batch_size 16 \
+  --clip_sec 12 \
+  2>&1 | tee \$EXP_ROOT/nemo_adapt_outputs/nemo_adapt_train.log
+
+
+CUDA_VISIBLE_DEVICES=7 python extract_nemo_adapt_embeddings.py \
+  --data_root \$DATA_ROOT \
+  --checkpoint \$EXP_ROOT/nemo_adapt_outputs/nemo_contrastive_final.pt \
+  --out_csv \$EXP_ROOT/nemo_adapt_outputs/nemo_adapt_embeddings.csv \
+  --batch_size 8 \
+  --clip_sec 12 \
+  2>&1 | tee \$EXP_ROOT/nemo_adapt_outputs/nemo_adapt_extract.log
+
+
+# ============================================================
+# Masked autoencoder SSL
+# ============================================================
+
+mkdir -p \$EXP_ROOT/masked_autoencoder_outputs
+
+CUDA_VISIBLE_DEVICES=7 python masked_autoencoder_train.py \
+  --data_root \$DATA_ROOT \
+  --outdir \$EXP_ROOT/masked_autoencoder_outputs \
+  --epochs 100 \
+  --batch_size 128 \
+  --clip_sec 12 \
+  2>&1 | tee \$EXP_ROOT/masked_autoencoder_outputs/mae_train.log
+
+
+CUDA_VISIBLE_DEVICES=7 python extract_masked_autoencoder_embeddings.py \
+  --data_root \$DATA_ROOT \
+  --checkpoint \$EXP_ROOT/masked_autoencoder_outputs/masked_autoencoder_final.pt \
+  --out_csv \$EXP_ROOT/masked_autoencoder_outputs/masked_autoencoder_embeddings.csv \
+  --batch_size 64 \
+  2>&1 | tee \$EXP_ROOT/masked_autoencoder_outputs/mae_extract.log
+
+
+# ============================================================
+# Finished
+# ============================================================
+
+echo ''
+echo 'DANUM SSL PIPELINE FINISHED'
+echo ''
+date
+
+"
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+python plot_probe_danum_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/SSL_full_experiments_danum/masked_autoencoder_outputs/masked_autoencoder_embeddings.csv \
+  --outdir /home/nvidia/test_run/SSL_full_experiments_danum/masked_autoencoder_outputs \
+  --feature_prefix emb_ \
+  --name danum_mae
+
+python plot_probe_danum_embeddings.py \
+  --embedding_csv /home/nvidia/test_run/SSL_full_experiments_danum/simclr_outputs/simclr_embeddings.csv \
+  --outdir /home/nvidia/test_run/SSL_full_experiments_danum/simclr_outputs \
+  --feature_prefix emb_ \
+  --name danum_simclr

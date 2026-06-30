@@ -1,0 +1,75 @@
+cd /home/nvidia/birdnet_test
+source birdnet_env/bin/activate
+
+tmux new-session -d -s birdnet_large_embeddings "
+cd /home/nvidia/birdnet_test &&
+source birdnet_env/bin/activate &&
+
+python extract_birdnet_segment_embeddings.py \
+  --data_root /data/ssl_v1/SSL_Clips \
+  --out_csv /data/ssl_v1/ksws_agile_species_search/birdnet_search_segment_embeddings.csv \
+  --batch_size 128 \
+  --n_workers 32 \
+  2>&1 | tee /data/ssl_v1/ksws_agile_species_search/birdnet_search_segment_embeddings.log
+"
+
+tmux new-session -d -s birdnet_segments_0to2k "
+cd /home/nvidia/birdnet_test &&
+source birdnet_env/bin/activate &&
+
+# CTRL + F to replace folder name
+
+export TMPDIR=/data/tmp
+
+cd /home/nvidia/birdnet_test
+source birdnet_env/bin/activate
+
+python extract_birdnet_segment_embeddings.py \
+  --data_root /data/ssl_v1/training_kswsspecies/longtailmacaque \
+  --out_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_birdnet_nn/seed_birdnet_embeddings.csv \
+  --batch_size 32 \
+  --n_workers 8 
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+python birdnet_centroid_similarity_search.py \
+  --seed_embeddings /data/ssl_v1/ksws_agile_species_search/longtailmacaque_birdnet_nn/seed_birdnet_embeddings.csv \
+  --search_embeddings /data/ssl_v1/ksws_agile_species_search/birdnet_search_segment_embeddings.csv \
+  --out_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_birdnet_nn/longtailmacaque_segment_candidates.csv \
+  --seed_label longtailmacaque \
+  --top_n 100
+
+python export_nn_candidates.py \
+  --candidates_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_birdnet_nn/longtailmacaque_segment_candidates.csv \
+  --out_dir /data/ssl_v1/ksws_agile_species_search/longtailmacaque_review_set \
+  --top_n 100
+
+## Perch emebddings
+
+cd /home/nvidia/birdnet_test
+source birdnet_env/bin/activate
+# seed embeddings
+python extract_perch_segment_embeddings.py \
+  --data_root /data/ssl_v1/training_kswsspecies/longtailmacaque \
+  --out_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_perch_nn/seed_perch_embeddings.csv \
+  --device CPU
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+# search
+python birdnet_centroid_similarity_search.py \
+  --seed_embeddings /data/ssl_v1/ksws_agile_species_search/longtailmacaque_perch_nn/seed_perch_embeddings.csv \
+  --search_embeddings /data/ssl_v1/ksws_agile_species_search/perch_search_embeddings.csv \
+  --out_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_perch_nn/longtailmacaque_candidates.csv \
+  --seed_label longtailmacaque \
+  --top_n 200
+
+# export
+python export_nn_candidates.py \
+  --candidates_csv /data/ssl_v1/ksws_agile_species_search/longtailmacaque_perch_nn/longtailmacaque_candidates.csv \
+  --out_dir /data/ssl_v1/ksws_agile_species_search/longtailmacaque_perch_review \
+  --top_n 100
+
+# Notes: elephant does not work, gibbons work for both, douc, muntjac, orange necked partridge, seem to work well with perch

@@ -1,0 +1,324 @@
+# ------------------------------------------------------------
+# Setup
+# ------------------------------------------------------------
+
+DATA_ROOT="/home/nvidia/data/ssl_v1/individuals_flat_cambodia"
+
+OUTPUT_ROOT=/home/nvidia/test_run/gibbon_individual_outputs_cambodia
+
+FULL_MODEL_ROOT=/home/nvidia/test_run/SSL_full_experiments
+
+DANUM_MODEL_ROOT=/home/nvidia/test_run/SSL_full_experiments_danum
+
+mkdir -p ${OUTPUT_ROOT}
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+
+# ------------------------------------------------------------
+# Full Cambodia SimCLR embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/simclr_full_outputs
+
+if [ -f "${OUTPUT_ROOT}/simclr_full_outputs/simclr_embeddings.csv" ]; then
+  echo "Full SimCLR gibbon embeddings already exist. Skipping."
+else
+  python extract_simclr_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${FULL_MODEL_ROOT}/simclr_outputs/simclr_resnet18_final.pt \
+    --out_csv ${OUTPUT_ROOT}/simclr_full_outputs/simclr_embeddings.csv
+fi
+
+
+# ------------------------------------------------------------
+# Danum SimCLR embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/simclr_danum_outputs
+
+if [ -f "${OUTPUT_ROOT}/simclr_danum_outputs/simclr_embeddings.csv" ]; then
+  echo "Danum SimCLR gibbon embeddings already exist. Skipping."
+else
+  python extract_simclr_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${DANUM_MODEL_ROOT}/simclr_outputs/simclr_resnet18_final.pt \
+    --out_csv ${OUTPUT_ROOT}/simclr_danum_outputs/simclr_embeddings.csv
+fi
+
+
+# ------------------------------------------------------------
+# NeMo baseline embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/nemo_outputs
+
+if [ -f "${OUTPUT_ROOT}/nemo_outputs/nemo_embeddings.csv" ]; then
+  echo "NeMo baseline gibbon embeddings already exist. Skipping."
+else
+  python extract_nemo_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/nemo_outputs/nemo_embeddings.csv
+fi
+
+
+# ------------------------------------------------------------
+# Full Cambodia NeMo adapted embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/nemo_adapt_full_outputs
+
+if [ -f "${OUTPUT_ROOT}/nemo_adapt_full_outputs/nemo_adapt_embeddings.csv" ]; then
+  echo "Full NeMo-adapt gibbon embeddings already exist. Skipping."
+else
+  python extract_nemo_adapt_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${FULL_MODEL_ROOT}/nemo_adapt_outputs/nemo_contrastive_epoch28.pt \
+    --out_csv ${OUTPUT_ROOT}/nemo_adapt_full_outputs/nemo_adapt_embeddings.csv \
+    --batch_size 8 \
+    --clip_sec 12
+fi
+
+
+# ------------------------------------------------------------
+# BirdNET embeddings
+# ------------------------------------------------------------
+
+cd /home/nvidia/birdnet_test
+source birdnet_env/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/birdnet_outputs
+
+if [ -f "${OUTPUT_ROOT}/birdnet_outputs/birdnet_embeddings.csv" ]; then
+  echo "BirdNET gibbon embeddings already exist. Skipping."
+else
+  python extract_birdnet_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/birdnet_outputs/birdnet_embeddings.csv
+fi
+
+
+# ------------------------------------------------------------
+# Perch v2 embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/perch_outputs
+
+if [ -f "${OUTPUT_ROOT}/perch_outputs/perch_embeddings.csv" ]; then
+  echo "Perch gibbon embeddings already exist. Skipping."
+else
+  python extract_perch_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --out_csv ${OUTPUT_ROOT}/perch_outputs/perch_embeddings.csv \
+    --device CPU \
+    --batch_size 4 \
+    --n_workers 8
+fi
+
+
+# ------------------------------------------------------------
+# BEATs embeddings
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run/beats/unilm/beats
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/beats_outputs
+
+if [ -f "${OUTPUT_ROOT}/beats_outputs/beats_embeddings.csv" ]; then
+  echo "BEATs gibbon embeddings already exist. Skipping."
+else
+  python extract_beats_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint /home/nvidia/test_run/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt \
+    --out_csv ${OUTPUT_ROOT}/beats_outputs/beats_embeddings.csv \
+    --batch_size 16
+fi
+
+
+# ------------------------------------------------------------
+# Full Cambodia masked autoencoder embeddings
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/masked_autoencoder_full_outputs
+
+if [ -f "${OUTPUT_ROOT}/masked_autoencoder_full_outputs/masked_autoencoder_embeddings.csv" ]; then
+  echo "Full MAE gibbon embeddings already exist. Skipping."
+else
+  python extract_masked_autoencoder_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${FULL_MODEL_ROOT}/masked_autoencoder_outputs/masked_autoencoder_final.pt \
+    --out_csv ${OUTPUT_ROOT}/masked_autoencoder_full_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+
+# ------------------------------------------------------------
+# Danum masked autoencoder embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/masked_autoencoder_danum_outputs
+
+if [ -f "${OUTPUT_ROOT}/masked_autoencoder_danum_outputs/masked_autoencoder_embeddings.csv" ]; then
+  echo "Danum MAE gibbon embeddings already exist. Skipping."
+else
+  python extract_masked_autoencoder_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${DANUM_MODEL_ROOT}/masked_autoencoder_outputs/masked_autoencoder_epoch20.pt \
+    --out_csv ${OUTPUT_ROOT}/masked_autoencoder_danum_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+
+# ------------------------------------------------------------
+# Full Cambodia supervised ecology embeddings
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/supervised_ecology_outputs
+
+if [ -f "${OUTPUT_ROOT}/supervised_ecology_outputs/supervised_ecology_embeddings.csv" ]; then
+  echo "Supervised ecology gibbon embeddings already exist. Skipping."
+else
+  python extract_supervised_ecology_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${FULL_MODEL_ROOT}/supervised_ecology_outputs/supervised_eco_encoder_final.pt \
+    --out_csv ${OUTPUT_ROOT}/supervised_ecology_outputs/supervised_ecology_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+
+DATA_ROOT="/home/nvidia/data/ssl_v1/individuals_flat_cambodia"
+OUTPUT_ROOT="/home/nvidia/test_run/gibbon_individual_outputs_cambodia"
+
+FULL_MODEL_ROOT="/data/ssl_v1/SSL_full_experiments"
+DANUM_MODEL_ROOT="/data/ssl_v1/SSL_full_experiments_danum"
+COMBINED_MODEL_ROOT="/data/ssl_v1/SSL_combined_experiments"
+
+
+# ------------------------------------------------------------
+# SimCLR tropical weighted ResNet18
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/simclr_tropical_weighted_outputs
+
+if [ -f "${OUTPUT_ROOT}/simclr_tropical_weighted_outputs/simclr_embeddings.csv" ]; then
+  echo "SimCLR tropical weighted R18 gibbon embeddings already exist. Skipping."
+else
+  python extract_simclr_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${COMBINED_MODEL_ROOT}/simclr_tropical_weighted_outputs/simclr_resnet18_epoch30.pt \
+    --out_csv ${OUTPUT_ROOT}/simclr_tropical_weighted_outputs/simclr_embeddings.csv
+fi
+
+
+# ------------------------------------------------------------
+# SimCLR tropical weighted ResNet50
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs
+
+if [ -f "${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_embeddings.csv" ]; then
+  echo "SimCLR tropical weighted R50 gibbon embeddings already exist. Skipping."
+else
+  python extract_simclr_resnet50_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${COMBINED_MODEL_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_resnet50_epoch40.pt \
+    --out_csv ${OUTPUT_ROOT}/simclr_tropical_weighted_resnet50_outputs/simclr_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+
+# ------------------------------------------------------------
+# Masked autoencoder tropical weighted
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run
+source ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs
+
+if [ -f "${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_embeddings.csv" ]; then
+  echo "MAE tropical weighted gibbon embeddings already exist. Skipping."
+else
+  python extract_masked_autoencoder_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${COMBINED_MODEL_ROOT}/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_epoch30.pt \
+    --out_csv ${OUTPUT_ROOT}/masked_autoencoder_tropical_weighted_outputs/masked_autoencoder_embeddings.csv \
+    --batch_size 64
+fi
+
+
+# ------------------------------------------------------------
+# Supervised ecology rainfall
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs
+
+if [ -f "${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs/supervised_ecology_rainfall_embeddings.csv" ]; then
+  echo "Supervised ecology rainfall gibbon embeddings already exist. Skipping."
+else
+  python extract_supervised_ecology_rainfall_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${FULL_MODEL_ROOT}/supervised_ecology_rainfall_outputs/supervised_eco_encoder_epoch30.pt \
+    --out_csv ${OUTPUT_ROOT}/supervised_ecology_rainfall_outputs/supervised_ecology_rainfall_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+
+# ------------------------------------------------------------
+# Student BirdNET
+# ------------------------------------------------------------
+
+mkdir -p ${OUTPUT_ROOT}/student_birdnet_outputs
+
+if [ -f "${OUTPUT_ROOT}/student_birdnet_outputs/student_birdnet_embeddings.csv" ]; then
+  echo "Student BirdNET gibbon embeddings already exist. Skipping."
+else
+  python extract_student_birdnet_embeddings.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint ${COMBINED_MODEL_ROOT}/student_birdnet_resnet18_outputs/student_BirdNET_resnet18_epoch30.pt \
+    --out_csv ${OUTPUT_ROOT}/student_birdnet_outputs/student_birdnet_embeddings.csv \
+    --batch_size 64 \
+    --clip_sec 12
+fi
+
+
+# ------------------------------------------------------------
+# BigVGAN
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run/BigVGAN
+source /home/nvidia/test_run/ssl_soundscapes/bin/activate
+
+mkdir -p ${OUTPUT_ROOT}/bigvgan_outputs
+
+if [ -f "${OUTPUT_ROOT}/bigvgan_outputs/bigvgan_embeddings.csv" ]; then
+  echo "BigVGAN gibbon embeddings already exist. Skipping."
+else
+  python extract_bigvan_embeddings_finetune.py \
+    --data_root ${DATA_ROOT} \
+    --checkpoint_file /data/ssl_v1/bigvgan_checkpoints/bigvgan_ksws_full_pretrained_init_4gpu/g_00004000 \
+    --out_csv ${OUTPUT_ROOT}/bigvgan_outputs/bigvgan_embeddings.csv \
+    --device cuda
+fi
+
+# ------------------------------------------------------------
+# Compare models and umap plot
+# ------------------------------------------------------------
+
+cd /home/nvidia/test_run 
+
+source ssl_soundscapes/bin/activate 
+
+python compare_all_models_gibbon_individuals_cambodia.py
+

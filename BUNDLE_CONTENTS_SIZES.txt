@@ -1,0 +1,12 @@
+2.2G	checkpoints_used
+49M	workflow
+49M	configs
+2.6M	results
+692K	scripts
+12K	MANIFEST_files.txt
+4.0K	requirements_ssl_soundscapes.txt
+4.0K	requirements_birdnet_env.txt
+4.0K	logs
+4.0K	figures
+4.0K	BUNDLE_SIZE.txt
+0	BUNDLE_CONTENTS_SIZES.txt
